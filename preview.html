@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Preview | Studio Hasanarofid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #000000;
+            --secondary: #ffffff;
+            --accent: #4F46E5;
+            --gray-light: #F9FAFB;
+        }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; }
+        
+        .preview-header {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 100;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .template-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .device-toggle {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .device-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            color: #9ca3af;
+        }
+
+        .device-btn.active {
+            background: #f3f4f6;
+            color: #000;
+        }
+
+        .buy-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .buy-btn:hover { background: var(--accent); }
+
+        .preview-container {
+            height: calc(100% - 70px);
+            background: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            padding: 2rem 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            transition: width 0.3s ease;
+        }
+
+        /* Device Sizes */
+        .preview-container.mobile iframe { width: 375px; border-radius: 20px; border: 10px solid #222; height: 667px; }
+        .preview-container.tablet iframe { width: 768px; border-radius: 20px; border: 10px solid #222; height: 1024px; }
+    </style>
+</head>
+<body>
+    <header class="preview-header">
+        <a href="index.html" class="back-btn">← Back to Studio</a>
+        
+        <div class="template-name" id="temp-name">Loading...</div>
+        
+        <div class="device-toggle">
+            <button class="device-btn active" onclick="setSize('desktop', this)">🖥️ Desktop</button>
+            <button class="device-btn" onclick="setSize('tablet', this)">📱 Tablet</button>
+            <button class="device-btn" onclick="setSize('mobile', this)">📱 Mobile</button>
+        </div>
+
+        <a href="index.html#pricing" class="buy-btn">Buy Template</a>
+    </header>
+
+    <div class="preview-container" id="container">
+        <iframe id="preview-frame" src=""></iframe>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('t') || 'business';
+        const frame = document.getElementById('preview-frame');
+        const nameEl = document.getElementById('temp-name');
+        const container = document.getElementById('container');
+
+        const config = {
+            'business': { name: 'Business Landing Page', url: 'templates/business.html' },
+            'portfolio': { name: 'Portfolio Personal', url: 'templates/portfolio.html' },
+            'umkm': { name: 'UMKM Product Showcase', url: 'templates/umkm.html' }
+        };
+
+        const current = config[type] || config['business'];
+        frame.src = current.url;
+        nameEl.textContent = current.name;
+
+        function setSize(size, btn) {
+            container.className = 'preview-container ' + size;
+            document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>
