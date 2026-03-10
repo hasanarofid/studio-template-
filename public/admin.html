@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Studio Hasanarofid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --dark: #0f172a;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; }
+        .header { background: var(--dark); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .container { padding: 2rem; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 2rem; }
+        h1, h2 { margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; font-weight: 600; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-verified { background: #d1fae5; color: #065f46; }
+        .btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-ghost { background: transparent; border: 1px solid #e2e8f0; color: var(--gray); }
+        .receipt-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; }
+        
+        /* Modal for Receipt */
+        #receipt-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        #receipt-modal img { max-width: 90%; max-height: 90%; border-radius: 8px; }
+        
+        .login-overlay { position: fixed; inset: 0; background: var(--light); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .login-box { width: 100%; max-width: 400px; }
+
+        .hidden { display: none !important; }
+        .tabs { border-bottom: 2px solid #e2e8f0; margin-bottom: 2rem; }
+        .tab-btn { background: none; border: none; padding: 1rem 2rem; cursor: pointer; font-weight: 600; color: var(--gray); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="card login-box">
+            <h2>Admin Login</h2>
+            <form id="admin-login-form">
+                <div style="margin-bottom: 1rem;">
+                    <label>Email</label>
+                    <input type="email" id="admin-email" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 0.5rem;" required>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Password</label>
+                    <input type="password" id="admin-password" style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 0.5rem;" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <header class="header">
+        <div style="font-weight: 700; font-size: 1.25rem;">Studio Admin</div>
+        <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('payments')">Verifikasi Pembayaran</button>
+            <button class="tab-btn" onclick="switchTab('templates')">Manage Templates</button>
+        </div>
+
+        <!-- Payments Section -->
+        <div id="section-payments" class="card">
+            <h2>Verifikasi Pembayaran</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>User</th>
+                        <th>Template</th>
+                        <th>Bukti</th>
+                        <th>Status / Alasan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-list">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Templates Section -->
+        <div id="section-templates" class="card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Manage Templates</h2>
+                <button class="btn btn-primary" onclick="openTemplateModal()">+ Add Template</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="templates-list">
+                    <!-- Loaded via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Template Modal -->
+    <div id="template-modal" class="modal-overlay">
+        <div class="card" style="width: 100%; max-width: 500px;">
+            <h2 id="modal-title">Add/Edit Template</h2>
+            <form id="template-form">
+                <input type="hidden" id="tpl-id">
+                <div class="form-group">
+                    <label>Nama Template</label>
+                    <input type="text" id="tpl-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <textarea id="tpl-desc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Harga (angka saja)</label>
+                    <input type="number" id="tpl-price" required>
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <input type="text" id="tpl-category">
+                </div>
+                <div class="form-group">
+                    <label>Preview URL (contoh: templates/business.html)</label>
+                    <input type="text" id="tpl-preview">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Simpan</button>
+                    <button type="button" class="btn btn-ghost" style="flex: 1;" onclick="closeTemplateModal()">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="receipt-modal" onclick="this.style.display='none'">
+        <img id="modal-img" src="" alt="Receipt">
+    </div>
+
+    <div id="reject-modal" class="modal-overlay">
+        <div class="card" style="width: 100%; max-width: 400px;">
+            <h2>Tolak Pembayaran</h2>
+            <p>Berikan alasan penolakan untuk dikirim ke user via email.</p>
+            <input type="hidden" id="reject-order-id">
+            <div class="form-group">
+                <label>Alasan Penolakan</label>
+                <textarea id="reject-reason" rows="3" placeholder="Contoh: Bukti transfer tidak terbaca atau nominal tidak sesuai." required></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-primary" style="flex: 1; background: #ef4444;" onclick="submitReject()">Tolak Sekarang</button>
+                <button class="btn btn-ghost" style="flex: 1;" onclick="closeRejectModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = './api';
+        
+        // Simple Auth Check
+        if (localStorage.getItem('admin_session')) {
+            document.getElementById('login-overlay').classList.add('hidden');
+            loadOrders();
+        }
+
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+
+            try {
+                const res = await fetch(`${API_BASE}/admin_login.php`, {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('admin_session', JSON.stringify(data.user));
+                    document.getElementById('login-overlay').classList.add('hidden');
+                    loadOrders();
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) { alert('Gagal login ke server.'); }
+        });
+
+        async function loadOrders() {
+            try {
+                const res = await fetch(`${API_BASE}/admin_actions.php?action=get_orders`);
+                const data = await res.json();
+                if (data.success) {
+                    renderOrders(data.orders);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function renderOrders(orders) {
+            const list = document.getElementById('orders-list');
+            list.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order.created_at}</td>
+                    <td>${order.user_name}<br><small style="color: var(--gray)">${order.user_email}</small></td>
+                    <td>${order.template_name}</td>
+                    <td>
+                        <img src="./uploads/${order.payment_receipt}" class="receipt-thumb" onclick="showReceipt(this.src)">
+                    </td>
+                    <td>
+                        <span class="status-badge status-${order.status}">${order.status}</span>
+                        ${order.rejection_reason ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem;">Ket: ${order.rejection_reason}</div>` : ''}
+                    </td>
+                    <td>
+                        ${order.status === 'pending' ? `
+                            <button class="btn btn-primary" onclick="verifyOrder(${order.id})">Verifikasi</button>
+                            <button class="btn btn-ghost" style="color: #ef4444;" onclick="openRejectModal(${order.id})">Tolak</button>
+                        ` : (order.status === 'verified' ? '<span style="color: var(--success); font-weight: 600;">✓ Selesai</span>' : '<span style="color: #ef4444;">✗ Ditolak</span>')}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showReceipt(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('receipt-modal').style.display = 'flex';
+        }
+
+        async function verifyOrder(id) {
+            if (!confirm('Verifikasi pembayaran ini?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/admin_actions.php?action=verify_payment`, {
+                    method: 'POST',
+                    body: JSON.stringify({ order_id: id })
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (data.success) {
+                    loadOrders();
+                }
+            } catch (err) { alert('Gagal verifikasi.'); }
+        }
+
+        function openRejectModal(id) {
+            document.getElementById('reject-order-id').value = id;
+            document.getElementById('reject-reason').value = '';
+            document.getElementById('reject-modal').style.display = 'flex';
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject-modal').style.display = 'none';
+        }
+
+        async function submitReject() {
+            const id = document.getElementById('reject-order-id').value;
+            const reason = document.getElementById('reject-reason').value;
+            if (!reason) return alert('Alasan wajib diisi.');
+
+            try {
+                const res = await fetch(`${API_BASE}/admin_actions.php?action=reject_payment`, {
+                    method: 'POST',
+                    body: JSON.stringify({ order_id: id, reason })
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (data.success) {
+                    closeRejectModal();
+                    loadOrders();
+                }
+            } catch (err) { alert('Gagal memproses penolakan.'); }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            document.getElementById('section-payments').classList.add('hidden');
+            document.getElementById('section-templates').classList.add('hidden');
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+            
+            if (tab === 'templates') loadTemplates();
+            else loadOrders();
+        }
+
+        async function loadTemplates() {
+            try {
+                const res = await fetch(`./api/get_templates.php`);
+                const data = await res.json();
+                if (data.success) {
+                    renderTemplates(data.templates);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        function renderTemplates(templates) {
+            const list = document.getElementById('templates-list');
+            list.innerHTML = templates.map(tpl => `
+                <tr>
+                    <td>${tpl.id}</td>
+                    <td>${tpl.name}</td>
+                    <td>${tpl.category}</td>
+                    <td>Rp${parseInt(tpl.price).toLocaleString('id-ID')}</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" onclick='editTemplate(${JSON.stringify(tpl)})'>Edit</button>
+                        <button class="btn btn-ghost btn-sm" style="color: #ef4444;" onclick="deleteTemplate(${tpl.id})">Del</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openTemplateModal(tpl = null) {
+            document.getElementById('modal-title').textContent = tpl ? 'Edit Template' : 'Add Template';
+            document.getElementById('tpl-id').value = tpl ? tpl.id : '';
+            document.getElementById('tpl-name').value = tpl ? tpl.name : '';
+            document.getElementById('tpl-desc').value = tpl ? tpl.description : '';
+            document.getElementById('tpl-price').value = tpl ? parseInt(tpl.price) : '';
+            document.getElementById('tpl-category').value = tpl ? tpl.category : '';
+            document.getElementById('tpl-preview').value = tpl ? tpl.preview_url : '';
+            
+            document.getElementById('template-modal').style.display = 'flex';
+        }
+
+        function closeTemplateModal() {
+            document.getElementById('template-modal').style.display = 'none';
+        }
+
+        document.getElementById('template-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('id', document.getElementById('tpl-id').value);
+            formData.append('name', document.getElementById('tpl-name').value);
+            formData.append('description', document.getElementById('tpl-desc').value);
+            formData.append('price', document.getElementById('tpl-price').value);
+            formData.append('category', document.getElementById('tpl-category').value);
+            formData.append('preview_url', document.getElementById('tpl-preview').value);
+
+            try {
+                const res = await fetch(`${API_BASE}/admin_actions.php?action=save_template`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeTemplateModal();
+                    loadTemplates();
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) { alert('Gagal menyimpan template.'); }
+        });
+
+        async function editTemplate(tpl) {
+            openTemplateModal(tpl);
+        }
+
+        async function deleteTemplate(id) {
+            if (!confirm('Hapus template ini?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/admin_actions.php?action=delete_template`, {
+                    method: 'POST',
+                    body: JSON.stringify({ id })
+                });
+                const data = await res.json();
+                if (data.success) loadTemplates();
+            } catch (err) { alert('Gagal menghapus.'); }
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_session');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

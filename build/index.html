@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="./assets/index-DHJ9XFyL.js"></script>
+    <script type="module" crossorigin src="./assets/index-LbxHrreN.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-CWyZMZJQ.css">
   </head>
   <body>
@@ -114,75 +114,9 @@
             <h2>Featured Templates</h2>
             <p>Pilih dari koleksi terbaik kami untuk bisnis Anda.</p>
           </div>
-          <div class="templates-grid">
-            <!-- Business Landing Page -->
-            <div class="template-card">
-              <div class="template-img">
-                <img
-                  src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=600"
-                  alt="Business Landing Page"
-                />
-                <span class="category">Business</span>
-              </div>
-              <div class="template-info">
-                <h3>Business Landing Page</h3>
-                <p>Desain profesional untuk agency dan layanan B2B.</p>
-                <div class="price">Rp199.000</div>
-                <div class="template-actions">
-                  <a
-                    href="preview.html?t=business"
-                    class="btn btn-sm btn-secondary"
-                    >Preview</a
-                  >
-                  <a href="#" class="btn btn-sm btn-primary">Buy Now</a>
-                </div>
-              </div>
-            </div>
-            <!-- Portfolio Personal -->
-            <div class="template-card">
-              <div class="template-img">
-                <img
-                  src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=600"
-                  alt="Portfolio Personal"
-                />
-                <span class="category">Personal</span>
-              </div>
-              <div class="template-info">
-                <h3>Portfolio Personal</h3>
-                <p>Showcase karya Anda dengan style minimalis dan modern.</p>
-                <div class="price">Rp129.000</div>
-                <div class="template-actions">
-                  <a
-                    href="preview.html?t=portfolio"
-                    class="btn btn-sm btn-secondary"
-                    >Preview</a
-                  >
-                  <a href="#" class="btn btn-sm btn-primary">Buy Now</a>
-                </div>
-              </div>
-            </div>
-            <!-- UMKM Showcase -->
-            <div class="template-card highlight">
-              <div class="template-img">
-                <img
-                  src="https://images.unsplash.com/photo-1542744094-24638eff58bb?auto=format&fit=crop&q=80&w=600"
-                  alt="UMKM Product Showcase"
-                />
-                <span class="category badge-popular">Best Seller</span>
-                <span class="category">UMKM</span>
-              </div>
-              <div class="template-info">
-                <h3>UMKM Product Showcase</h3>
-                <p>Tampilkan produk jualan Anda dengan foto yang memikat.</p>
-                <div class="price">Rp249.000</div>
-                <div class="template-actions">
-                  <a href="preview.html?t=umkm" class="btn btn-sm btn-secondary"
-                    >Preview</a
-                  >
-                  <a href="#" class="btn btn-sm btn-primary">Buy Now</a>
-                </div>
-              </div>
-            </div>
+          <div class="templates-grid" id="templates-container">
+            <!-- Templates will be injected here via JavaScript -->
+            <div class="loading">Memuat template...</div>
           </div>
         </div>
       </section>
@@ -413,6 +347,40 @@
             />
           </div>
           <button type="submit" class="btn btn-primary w-full">Register</button>
+        </form>
+      </div>
+    </div>
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-payment-modal">&times;</span>
+        <h3>Konfirmasi Pembayaran</h3>
+        <p id="payment-template-name" style="font-weight: 700; color: var(--accent); margin-bottom: 1rem;"></p>
+        
+        <div class="payment-info" style="background: var(--gray-light); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+          <p style="margin: 0; font-size: 0.9rem; color: var(--gray);">Transfer ke rekening BCA:</p>
+          <p style="margin: 0.5rem 0; font-weight: 700; font-size: 1.1rem;">4650499269</p>
+          <p style="margin: 0; font-size: 0.9rem;">an Akhmad Hasan Arofid</p>
+          <p style="margin-top: 1rem; font-weight: 700;">Total: <span id="payment-total"></span></p>
+        </div>
+
+        <form id="payment-form">
+          <input type="hidden" id="pay-template-id">
+          <input type="hidden" id="pay-amount">
+          
+          <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="pay-name" required placeholder="Nama sesuai rekening">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="pay-email" required placeholder="Email untuk pengiriman file">
+          </div>
+          <div class="form-group">
+            <label>Bukti Transfer (Gambar)</label>
+            <input type="file" id="pay-receipt" accept="image/*" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-full" id="btn-submit-payment">Kirim Bukti Pembayaran</button>
         </form>
       </div>
     </div>

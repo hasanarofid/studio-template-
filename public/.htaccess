@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Ensure index.html is the default index file
+  DirectoryIndex index.html
+
+  # Redirect all requests to index.html if the file/folder doesn't exist
+  # This is useful for Single Page Applications (SPA)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
