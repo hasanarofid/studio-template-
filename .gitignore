@@ -1,6 +1,13 @@
 node_modules
 .DS_Store
 dist
+build
 .env
 .npmrc
 *.log
+
+# Privacy / Sensitive files
+*db_config.php
+*smtp_config.php
+public/uploads/
+build/api/
